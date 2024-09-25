@@ -1,16 +1,15 @@
 // src/Dashboard.jsx
 import React, { useState, useEffect } from 'react';
-import { FaRobot, FaCode, FaQuestionCircle, FaExchangeAlt, FaClock, FaUser, FaCoins, FaSignOutAlt } from 'react-icons/fa';
+import { FaRobot, FaCode, FaHandsHelping, FaQuestionCircle, FaUser, FaCoins, FaSignOutAlt } from 'react-icons/fa';
 import { useAuth } from '../../context/AuthContext'; // Import useAuth hook
 import { doc, onSnapshot, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebaseConfig';
 
 const toolCosts = {
-  gpt: 50,
-  codeSnippet: 30,
-  askMentor: 40,
-  swapProgram: 60,
-  timeExtended: 20
+  aiAssistance: 40,
+  codeSnippet: 50,
+  pairProgramming: 50,
+  answerQuestion: 70
 };
 
 const Dashboard = () => {
@@ -34,18 +33,33 @@ const Dashboard = () => {
   }, [user]);
 
   const handleToolUse = async (tool) => {
-    if (!userData) return; // Ensure userData is available
-
+    if (!userData) return;
+  
     const cost = toolCosts[tool];
     if (userData.virtualCoins >= cost) {
       try {
         const docRef = doc(db, 'users', user.uid);
+  
+        // Increment tool usage count
+        const newToolUsageCount = (userData.usage[tool] || 0) + 1;
+  
         await updateDoc(docRef, {
-          [`usage.${tool}`]: true,
-          virtualCoins: userData.virtualCoins - cost
+          [`usage.${tool}`]: newToolUsageCount, // Store the new count in Firestore
+          virtualCoins: userData.virtualCoins - cost // Deduct the virtual coins
         });
-
-        setMessage('');
+  
+        // Update local state for immediate UI change
+        setUserData((prevData) => ({
+          ...prevData,
+          usage: {
+            ...prevData.usage,
+            [tool]: newToolUsageCount
+          },
+          virtualCoins: prevData.virtualCoins - cost // Update local coins state
+        }));
+  
+        setMessage(`You used ${tool} and spent ${cost} coins. Tool used ${newToolUsageCount} times.`);
+        
       } catch (error) {
         console.error('Error updating tool usage:', error);
       }
@@ -105,73 +119,64 @@ const Dashboard = () => {
 
       {/* Message Section */}
       {message && (
-        <div className="w-full max-w-4xl p-4 mt-4 bg-red-200 text-red-800 rounded-lg text-center">
+        <div className="w-full max-w-4xl p-4 mt-4 bg-green-200 text-green-800 rounded-lg text-center">
           <p className="text-xl font-semibold">{message}</p>
         </div>
       )}
 
       {/* Tools Section */}
       <div className="w-full max-w-4xl p-4 mt-4 grid grid-cols-2 gap-4">
-        {!toolStatus?.gpt && (
-          <div className="flex flex-col items-center bg-white p-4 shadow-md rounded-lg">
-            <FaRobot className="text-4xl mb-2 text-blue-600" />
-            <p className="font-semibold">Use Chat GPT</p>
-            <button
-              className="mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-              onClick={() => handleToolUse('gpt')}
-            >
-              Use (Cost: 50)
-            </button>
-          </div>
-        )}
-        {!toolStatus?.codeSnippet && (
-          <div className="flex flex-col items-center bg-white p-4 shadow-md rounded-lg">
-            <FaCode className="text-4xl mb-2 text-green-600" />
-            <p className="font-semibold">Get Code Snippet</p>
-            <button
-              className="mt-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-              onClick={() => handleToolUse('codeSnippet')}
-            >
-              Use (Cost: 30)
-            </button>
-          </div>
-        )}
-        {!toolStatus?.askMentor && (
-          <div className="flex flex-col items-center bg-white p-4 shadow-md rounded-lg">
-            <FaQuestionCircle className="text-4xl mb-2 text-yellow-600" />
-            <p className="font-semibold">Ask Mentor</p>
-            <button
-              className="mt-2 px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700"
-              onClick={() => handleToolUse('askMentor')}
-            >
-              Use (Cost: 40)
-            </button>
-          </div>
-        )}
-        {!toolStatus?.swapProgram && (
-          <div className="flex flex-col items-center bg-white p-4 shadow-md rounded-lg">
-            <FaExchangeAlt className="text-4xl mb-2 text-purple-600" />
-            <p className="font-semibold">Swap Program</p>
-            <button
-              className="mt-2 px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700"
-              onClick={() => handleToolUse('swapProgram')}
-            >
-              Use (Cost: 60)
-            </button>
-          </div>
-        )}
-        {!toolStatus?.timeExtended && (
-          <div className="flex flex-col items-center bg-white p-4 shadow-md rounded-lg">
-            <FaClock className="text-4xl mb-2 text-red-600" />
-            <p className="font-semibold">Timer Extend</p>
-            <button
-              className="mt-2 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-              onClick={() => handleToolUse('timeExtended')}
-            >
-              Use (Cost: 20)
-            </button>
-          </div>
-        )}
+        {/* AI Assistance */}
+        <div className="flex flex-col items-center bg-white p-4 shadow-md rounded-lg">
+          <FaRobot className="text-4xl mb-2 text-blue-600" />
+          <p className="font-semibold">Use AI Assistance</p>
+          <p className="text-sm text-green-600 mt-2">Tool Used {toolStatus?.aiAssistance ? `(${toolCosts.aiAssistance} coins spent)` : ''}</p>
+          <button
+            className="mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            onClick={() => handleToolUse('aiAssistance')}
+          >
+            Use (Cost: 40)
+          </button>
+        </div>
+
+        {/* Code Snippet */}
+        <div className="flex flex-col items-center bg-white p-4 shadow-md rounded-lg">
+          <FaCode className="text-4xl mb-2 text-green-600" />
+          <p className="font-semibold">Get Code Snippet</p>
+          <p className="text-sm text-green-600 mt-2">Tool Used {toolStatus?.codeSnippet ? `(${toolCosts.codeSnippet} coins spent)` : ''}</p>
+          <button
+            className="mt-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+            onClick={() => handleToolUse('codeSnippet')}
+          >
+            Use (Cost: 50)
+          </button>
+        </div>
+
+        {/* Pair Programming */}
+        <div className="flex flex-col items-center bg-white p-4 shadow-md rounded-lg">
+          <FaHandsHelping className="text-4xl mb-2 text-purple-600" />
+          <p className="font-semibold">Pair Programming</p>
+          <p className="text-sm text-green-600 mt-2">Tool Used {toolStatus?.pairProgramming ? `(${toolCosts.pairProgramming} coins spent)` : ''}</p>
+          <button
+            className="mt-2 px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700"
+            onClick={() => handleToolUse('pairProgramming')}
+          >
+            Use (Cost: 50)
+          </button>
+        </div>
+
+        {/* Answer Question */}
+        <div className="flex flex-col items-center bg-white p-4 shadow-md rounded-lg">
+          <FaQuestionCircle className="text-4xl mb-2 text-yellow-600" />
+          <p className="font-semibold">Answer Question</p>
+          <p className="text-sm text-green-600 mt-2">Tool Used {toolStatus?.answerQuestion ? `(${toolCosts.answerQuestion} coins spent)` : ''}</p>
+          <button
+            className="mt-2 px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700"
+            onClick={() => handleToolUse('answerQuestion')}
+          >
+            Use (Cost: 70)
+          </button>
+        </div>
       </div>
     </div>
   );

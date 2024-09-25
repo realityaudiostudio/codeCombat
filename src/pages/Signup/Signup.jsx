@@ -1,4 +1,3 @@
-// src/Signup.jsx
 import React, { useState } from 'react';
 import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
@@ -23,11 +22,11 @@ const Signup = () => {
         virtualCoins: 500,
         teamName: teamName, // Add teamName to the document
         usage: {
-          gpt: false,
-          codeSnippet: false,
-          askMentor: false,
-          swapProgram: false,
-          timeExtended: false,
+          gpt: 0,               // Initialize with 0 usage count
+          codeSnippet: 0,        // Initialize with 0 usage count
+          askMentor: 0,          // Initialize with 0 usage count
+          swapProgram: 0,        // Initialize with 0 usage count
+          timeExtended: 0,       // Initialize with 0 usage count
         },
       });
 
