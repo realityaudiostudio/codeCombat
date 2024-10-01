@@ -14,12 +14,10 @@ const Login = () => {
     setError('');
   
     try {
-      console.log('Attempting login with', email, password); // Debugging
       await login(email, password);
   
       // Ensure login was successful before navigating
       // If login is asynchronous, you may want to wait for confirmation
-      console.log('Login successful');
   
       // Optional: Check if login was successful before navigating
       // For example, you might have a way to verify login state or user info

@@ -11,7 +11,6 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      console.log('Auth state changed:', currentUser); // Debugging
       if (currentUser) {
         try {
           const docRef = doc(db, 'users', currentUser.uid);
@@ -36,7 +35,6 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      console.log('Sign-in successful');
     } catch (error) {
       console.error('Error during sign-in:', error.message);
       throw error; // Re-throw the error to be caught in the Login component

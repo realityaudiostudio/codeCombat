@@ -4,6 +4,7 @@ import { FaRobot, FaCode, FaHandsHelping, FaQuestionCircle, FaUser, FaCoins, FaS
 import { useAuth } from '../../context/AuthContext'; // Import useAuth hook
 import { doc, onSnapshot, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebaseConfig';
+import GeminiBot from '../GeminiBot/GeminiBot';
 
 const toolCosts = {
   aiAssistance: 40,
@@ -22,7 +23,6 @@ const Dashboard = () => {
       const docRef = doc(db, 'users', user.uid);
       const unsubscribe = onSnapshot(docRef, (doc) => {
         const data = doc.data();
-        console.log('User data:', data); // Debugging line
         setUserData(data);
       }, (error) => {
         console.error('Error fetching user data:', error); // Error handling
@@ -32,7 +32,8 @@ const Dashboard = () => {
     }
   }, [user]);
 
-  const handleToolUse = async (tool) => {
+  const handleToolUse = async (tool) => {    
+    
     if (!userData) return;
   
     const cost = toolCosts[tool];
@@ -55,7 +56,6 @@ const Dashboard = () => {
             ...prevData.usage,
             [tool]: newToolUsageCount
           },
-          virtualCoins: prevData.virtualCoins - cost // Update local coins state
         }));
   
         setMessage(`You used ${tool} and spent ${cost} coins. Tool used ${newToolUsageCount} times.`);
@@ -87,12 +87,13 @@ const Dashboard = () => {
       <div className="w-full max-w-4xl p-4 mt-4 bg-white shadow-md rounded-lg flex items-center justify-between">
         <div className="flex items-center">
           <FaUser className="text-2xl text-gray-600 mr-2" />
-          <p className="text-lg font-semibold">Welcome, {teamName}</p> {/* Display team name */}
+          <p className="text-lg font-semibold">Welcome, {teamName}</p>{" "}
+          {/* Display team name */}
         </div>
 
         {/* Logout Button */}
-        <button 
-          className="flex items-center px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 focus:outline-none" 
+        <button
+          className="flex items-center px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 focus:outline-none"
           onClick={logout}
         >
           <FaSignOutAlt className="mr-2" />
@@ -103,7 +104,9 @@ const Dashboard = () => {
       {/* Points Section */}
       <div className="w-full max-w-4xl p-4 mt-4 bg-white shadow-md rounded-lg text-center">
         <h2 className="text-2xl font-semibold mb-2">Current Points</h2>
-        <p className="text-3xl font-bold">{points !== undefined ? points : 'Loading...'}</p>
+        <p className="text-3xl font-bold">
+          {points !== undefined ? points : "Loading..."}
+        </p>
       </div>
 
       {/* Virtual Coins Section */}
@@ -112,7 +115,9 @@ const Dashboard = () => {
           <FaCoins className="text-4xl text-yellow-500 mr-2" />
           <div>
             <h2 className="text-2xl font-semibold mb-2">Virtual Coins</h2>
-            <p className="text-3xl font-bold">{virtualCoins !== undefined ? virtualCoins : 'Loading...'}</p>
+            <p className="text-3xl font-bold">
+              {virtualCoins !== undefined ? virtualCoins : "Loading..."}
+            </p>
           </div>
         </div>
       </div>
@@ -127,7 +132,7 @@ const Dashboard = () => {
       {/* Tools Section */}
       <div className="w-full max-w-4xl p-4 mt-4 grid grid-cols-2 gap-4">
         {/* AI Assistance */}
-        <div className="flex flex-col items-center bg-white p-4 shadow-md rounded-lg">
+        {/* <div className="flex flex-col items-center bg-white p-4 shadow-md rounded-lg">
           <FaRobot className="text-4xl mb-2 text-blue-600" />
           <p className="font-semibold">Use AI Assistance</p>
           <p className="text-sm text-green-600 mt-2">Tool Used {toolStatus?.aiAssistance ? `(${toolCosts.aiAssistance} coins spent)` : ''}</p>
@@ -137,16 +142,21 @@ const Dashboard = () => {
           >
             Use (Cost: 40)
           </button>
-        </div>
+        </div> */}
 
         {/* Code Snippet */}
         <div className="flex flex-col items-center bg-white p-4 shadow-md rounded-lg">
           <FaCode className="text-4xl mb-2 text-green-600" />
           <p className="font-semibold">Get Code Snippet</p>
-          <p className="text-sm text-green-600 mt-2">Tool Used {toolStatus?.codeSnippet ? `(${toolCosts.codeSnippet} coins spent)` : ''}</p>
+          <p className="text-sm text-green-600 mt-2">
+            Tool Used{" "}
+            {toolStatus?.codeSnippet
+              ? `(${toolCosts.codeSnippet} coins spent)`
+              : ""}
+          </p>
           <button
             className="mt-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-            onClick={() => handleToolUse('codeSnippet')}
+            onClick={() => handleToolUse("codeSnippet")}
           >
             Use (Cost: 50)
           </button>
@@ -156,10 +166,15 @@ const Dashboard = () => {
         <div className="flex flex-col items-center bg-white p-4 shadow-md rounded-lg">
           <FaHandsHelping className="text-4xl mb-2 text-purple-600" />
           <p className="font-semibold">Pair Programming</p>
-          <p className="text-sm text-green-600 mt-2">Tool Used {toolStatus?.pairProgramming ? `(${toolCosts.pairProgramming} coins spent)` : ''}</p>
+          <p className="text-sm text-green-600 mt-2">
+            Tool Used{" "}
+            {toolStatus?.pairProgramming
+              ? `(${toolCosts.pairProgramming} coins spent)`
+              : ""}
+          </p>
           <button
             className="mt-2 px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700"
-            onClick={() => handleToolUse('pairProgramming')}
+            onClick={() => handleToolUse("pairProgramming")}
           >
             Use (Cost: 50)
           </button>
@@ -169,15 +184,22 @@ const Dashboard = () => {
         <div className="flex flex-col items-center bg-white p-4 shadow-md rounded-lg">
           <FaQuestionCircle className="text-4xl mb-2 text-yellow-600" />
           <p className="font-semibold">Answer Question</p>
-          <p className="text-sm text-green-600 mt-2">Tool Used {toolStatus?.answerQuestion ? `(${toolCosts.answerQuestion} coins spent)` : ''}</p>
+          <p className="text-sm text-green-600 mt-2">
+            Tool Used{" "}
+            {toolStatus?.answerQuestion
+              ? `(${toolCosts.answerQuestion} coins spent)`
+              : ""}
+          </p>
           <button
             className="mt-2 px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700"
-            onClick={() => handleToolUse('answerQuestion')}
+            onClick={() => handleToolUse("answerQuestion")}
           >
             Use (Cost: 70)
           </button>
         </div>
+  
       </div>
+      <GeminiBot handleToolUse={handleToolUse} userData={userData} />
     </div>
   );
 };

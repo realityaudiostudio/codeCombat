@@ -34,7 +34,6 @@ const Signup = () => {
       setEmail('');
       setPassword('');
       setTeamName(''); // Reset team name
-      console.log('Signup successful');
     } catch (err) {
       setError(err.message);
       console.error('Error signing up:', err);
