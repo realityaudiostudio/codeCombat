@@ -28,7 +28,7 @@ const GptUsage = () => {
             'https://api.openai.com/v1/chat/completions',
             {
               model: 'gpt-4', // Specify the model
-              messages: [{ role: 'user', content: query }],
+              messages: [{ role: 'User', content: query }],
               max_tokens: 150, // Adjust as needed
             },
           {

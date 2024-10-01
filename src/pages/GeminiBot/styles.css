@@ -14,14 +14,16 @@
     font-size: 1.2rem;
     margin-bottom: 15px;
     text-align: center;
+    padding-bottom: 20px;
   }
+  
   
   /* Message list styles */
   .message-list {
     list-style-type: none;
     padding: 0;
     margin: 0;
-    height: 300px;
+    height: 400px;
     overflow-y: auto;
     border: 1px solid #e0e0e0;
     border-radius: 8px;

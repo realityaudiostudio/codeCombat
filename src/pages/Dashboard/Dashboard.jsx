@@ -102,7 +102,7 @@ const Dashboard = () => {
 
       {/* Points Section */}
       <div className="w-full max-w-4xl p-4 mt-4 bg-white shadow-md rounded-lg text-center">
-        <h2 className="text-2xl font-semibold mb-2">Current Points</h2>
+        <h2 className="text-2xl font-semibold mb-2">HACKERRANK Points</h2>
         <p className="text-3xl font-bold">
           {points !== undefined ? points : "Loading..."}
         </p>
@@ -196,9 +196,13 @@ const Dashboard = () => {
             Use (Cost: 70)
           </button>
         </div>
-  
       </div>
       <GeminiBot handleToolUse={handleToolUse} userData={userData} />
+      {message && (
+        <div className="w-full max-w-4xl p-4 mt-4 bg-green-200 text-green-800 rounded-lg text-center">
+          <p className="text-xl font-semibold">{message}</p>
+        </div>
+      )}
     </div>
   );
 };

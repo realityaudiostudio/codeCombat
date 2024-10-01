@@ -15,6 +15,7 @@ const GeminiBot = ({ handleToolUse, userData }) => {
   });
 
   const [userInput, setUserInput] = useState("");
+  const [wordCount, setWordCount] = useState(0); // State for word count
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false); // Flag for submission in progress
 
@@ -23,10 +24,24 @@ const GeminiBot = ({ handleToolUse, userData }) => {
   }, [messages]);
 
   const handleInputChange = (event) => {
-    setUserInput(event.target.value);
+    const inputText = event.target.value;
+    const wordCount = inputText.trim().split(/\s+/).filter(Boolean).length;
+
+    // Block further input if the word count exceeds 100
+    if (wordCount > 100) {
+      event.preventDefault();
+      return;
+    }
+
+    // Dynamically adjust the textarea height
+    event.target.style.height = "auto"; // Reset the height
+    event.target.style.height = event.target.scrollHeight + "px"; // Set it to scroll height
+
+    // Update word count and user input state
+    setWordCount(wordCount);
+    setUserInput(inputText);
   };
 
-  // Updated handleSubmit with early return if already submitting
   const handleSubmit = async (event) => {
     if (event) event.preventDefault(); // Prevent default form submission
 
@@ -36,15 +51,16 @@ const GeminiBot = ({ handleToolUse, userData }) => {
 
     setIsSubmitting(true); // Set submission flag to true
     setIsLoading(true);
-    const newUserMessage = { role: "user", content: userInput };
+    const newUserMessage = { role: "User", content: userInput };
     setMessages((prevMessages) => [...prevMessages, newUserMessage]);
     setUserInput("");
+    setWordCount(0); // Reset word count
 
     try {
       const model = genAI.getGenerativeModel({ model: "gemini-pro" });
       const result = await model.generateContent(userInput);
       const newAssistantMessage = {
-        role: "assistant",
+        role: "Assistant",
         content: result.response.text(),
       };
       setMessages((prevMessages) => [...prevMessages, newAssistantMessage]);
@@ -53,24 +69,33 @@ const GeminiBot = ({ handleToolUse, userData }) => {
       setMessages((prevMessages) => [
         ...prevMessages,
         {
-          role: "assistant",
+          role: "Assistant",
           content: "Sorry, I encountered an error. Please try again.",
         },
       ]);
     } finally {
       setIsLoading(false);
       setIsSubmitting(false); // Reset submission flag after completion
+
+      // Reset textarea height after submission
+      const textarea = document.querySelector(".input-field");
+      if (textarea) {
+        textarea.style.height = "auto"; // Reset to default small size
+      }
     }
   };
 
   return (
     <div className="chatbot-container">
-      <h2>Gemini chatbot</h2>
+      <h2>
+        <b>GEMINI CHATBOT</b> - Chat continuation based on previous messages not
+        available. <b>Give relevant details for each message.</b>
+      </h2>
       <ul className="message-list">
         {messages.map((message, index) => (
           <li key={index} className={message.role}>
             <strong>{message.role}:</strong>
-            {message.role === "assistant" ? (
+            {message.role === "Assistant" ? (
               <ReactMarkdown>{message.content}</ReactMarkdown>
             ) : (
               message.content
@@ -79,14 +104,12 @@ const GeminiBot = ({ handleToolUse, userData }) => {
         ))}
       </ul>
       <form className="input-container" onSubmit={handleSubmit}>
-        {/* Added form to prevent multiple submissions */}
-        <input
+        <textarea
           className="input-field"
-          type="text"
           value={userInput}
           onChange={handleInputChange}
           disabled={userData.virtualCoins < 40 || isLoading || isSubmitting}
-          onKeyDown={(e) => e.key === "Enter" && handleSubmit(e)} // Use onKeyDown for Enter key
+          rows="1" // Starting height
         />
         <button
           className="send-button"
@@ -96,9 +119,12 @@ const GeminiBot = ({ handleToolUse, userData }) => {
           }}
           disabled={userData.virtualCoins < 40 || isLoading || isSubmitting} // Disable button when submitting or loading
         >
-          Send
+          Send (COST: )
         </button>
       </form>
+      {/* Display the word count */}
+      <p>Word count: {wordCount}/100</p>
+
       {isLoading && <p>Loading...</p>}
     </div>
   );
