@@ -22,7 +22,7 @@ const Login = () => {
       // Optional: Check if login was successful before navigating
       // For example, you might have a way to verify login state or user info
   
-      navigate('/dashboard'); // Ensure this is the correct path
+      navigate('/'); // Ensure this is the correct path
     } catch (err) {
       console.error('Login failed:', err.message);
       setError(err.message); // Show error message if login fails

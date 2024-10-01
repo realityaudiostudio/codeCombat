@@ -1,4 +1,3 @@
-// src/Dashboard.jsx
 import React, { useState, useEffect } from 'react';
 import { FaRobot, FaCode, FaHandsHelping, FaQuestionCircle, FaUser, FaCoins, FaSignOutAlt } from 'react-icons/fa';
 import { useAuth } from '../../context/AuthContext'; // Import useAuth hook
