@@ -1,69 +1,81 @@
-import React, { useState, useEffect } from 'react';
-import { FaRobot, FaCode, FaHandsHelping, FaQuestionCircle, FaUser, FaCoins, FaSignOutAlt } from 'react-icons/fa';
-import { useAuth } from '../../context/AuthContext'; // Import useAuth hook
-import { doc, onSnapshot, updateDoc } from 'firebase/firestore';
-import { db } from '../../firebaseConfig';
-import GeminiBot from '../GeminiBot/GeminiBot';
+import React, { useState, useEffect } from "react";
+import {
+  FaRobot,
+  FaCode,
+  FaHandsHelping,
+  FaQuestionCircle,
+  FaUser,
+  FaCoins,
+  FaSignOutAlt,
+} from "react-icons/fa";
+import { useAuth } from "../../context/AuthContext"; // Import useAuth hook
+import { doc, onSnapshot, updateDoc } from "firebase/firestore";
+import { db } from "../../firebaseConfig";
+import GeminiBot from "../GeminiBot/GeminiBot";
 
 const toolCosts = {
-  aiAssistance: 40,
-  codeSnippet: 50,
-  pairProgramming: 50,
-  answerQuestion: 70
+  aiAssistance: 300,
+  codeSnippet: 200,
+  pairProgramming: 100,
+  answerQuestion: 100, //give 100 decrease -150
 };
 
 const Dashboard = () => {
   const { user, logout } = useAuth();
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
   const [userData, setUserData] = useState(null);
 
   useEffect(() => {
     if (user) {
-      const docRef = doc(db, 'users', user.uid);
-      const unsubscribe = onSnapshot(docRef, (doc) => {
-        const data = doc.data();
-        setUserData(data);
-      }, (error) => {
-        console.error('Error fetching user data:', error); // Error handling
-      });
+      const docRef = doc(db, "users", user.uid);
+      const unsubscribe = onSnapshot(
+        docRef,
+        (doc) => {
+          const data = doc.data();
+          setUserData(data);
+        },
+        (error) => {
+          console.error("Error fetching user data:", error); // Error handling
+        }
+      );
 
       return () => unsubscribe(); // Cleanup subscription on unmount
     }
   }, [user]);
 
-  const handleToolUse = async (tool) => {    
-    
+  const handleToolUse = async (tool) => {
     if (!userData) return;
-  
+
     const cost = toolCosts[tool];
     if (userData.virtualCoins >= cost) {
       try {
-        const docRef = doc(db, 'users', user.uid);
-  
+        const docRef = doc(db, "users", user.uid);
+
         // Increment tool usage count
         const newToolUsageCount = (userData.usage[tool] || 0) + 1;
-  
+
         await updateDoc(docRef, {
           [`usage.${tool}`]: newToolUsageCount, // Store the new count in Firestore
-          virtualCoins: userData.virtualCoins - cost // Deduct the virtual coins
+          virtualCoins: userData.virtualCoins - cost, // Deduct the virtual coins
         });
-  
+
         // Update local state for immediate UI change
         setUserData((prevData) => ({
           ...prevData,
           usage: {
             ...prevData.usage,
-            [tool]: newToolUsageCount
+            [tool]: newToolUsageCount,
           },
         }));
-  
-        setMessage(`You used ${tool} and spent ${cost} coins. Tool used ${newToolUsageCount} times.`);
-        
+
+        setMessage(
+          `You used ${tool} and spent ${cost} coins. Tool used ${newToolUsageCount} times.`
+        );
       } catch (error) {
-        console.error('Error updating tool usage:', error);
+        console.error("Error updating tool usage:", error);
       }
     } else {
-      setMessage('Insufficient coins.');
+      setMessage("Insufficient coins.");
     }
   };
 
@@ -72,8 +84,12 @@ const Dashboard = () => {
   }
 
   // Retrieve team name directly from userData
-  const teamName = userData.teamName || 'No team name set';
-  const { virtualCoins, usage: toolStatus, hackerRankPoints: points } = userData;
+  const teamName = userData.teamName || "No team name set";
+  const {
+    virtualCoins,
+    usage: toolStatus,
+    hackerRankPoints: points,
+  } = userData;
 
   return (
     <div className="flex flex-col items-center p-4 bg-gray-100 min-h-screen">
@@ -130,18 +146,7 @@ const Dashboard = () => {
 
       {/* Tools Section */}
       <div className="w-full max-w-4xl p-4 mt-4 grid grid-cols-2 gap-4">
-        {/* AI Assistance */}
-        {/* <div className="flex flex-col items-center bg-white p-4 shadow-md rounded-lg">
-          <FaRobot className="text-4xl mb-2 text-blue-600" />
-          <p className="font-semibold">Use AI Assistance</p>
-          <p className="text-sm text-green-600 mt-2">Tool Used {toolStatus?.aiAssistance ? `(${toolCosts.aiAssistance} coins spent)` : ''}</p>
-          <button
-            className="mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-            onClick={() => handleToolUse('aiAssistance')}
-          >
-            Use (Cost: 40)
-          </button>
-        </div> */}
+        
 
         {/* Code Snippet */}
         <div className="flex flex-col items-center bg-white p-4 shadow-md rounded-lg">
@@ -157,7 +162,7 @@ const Dashboard = () => {
             className="mt-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
             onClick={() => handleToolUse("codeSnippet")}
           >
-            Use (Cost: 50)
+            Use (Cost: 200)
           </button>
         </div>
 
@@ -175,7 +180,7 @@ const Dashboard = () => {
             className="mt-2 px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700"
             onClick={() => handleToolUse("pairProgramming")}
           >
-            Use (Cost: 50)
+            Use (Cost: 100)
           </button>
         </div>
 
@@ -193,7 +198,7 @@ const Dashboard = () => {
             className="mt-2 px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700"
             onClick={() => handleToolUse("answerQuestion")}
           >
-            Use (Cost: 70)
+            Use (Cost: 100)
           </button>
         </div>
       </div>
@@ -202,6 +207,18 @@ const Dashboard = () => {
         <div className="w-full max-w-4xl p-4 mt-4 bg-green-200 text-green-800 rounded-lg text-center">
           <p className="text-xl font-semibold">{message}</p>
         </div>
+      )}
+      <br />
+      {userData.snippet == "" ? (
+        <p>NO CODE SNIPPET REQUESTED !</p>
+      ) : (
+        <>
+          <h1>CODE SNIPPET</h1>
+
+          <pre>
+            <code>{userData.snippet}</code>
+          </pre>
+        </>
       )}
     </div>
   );

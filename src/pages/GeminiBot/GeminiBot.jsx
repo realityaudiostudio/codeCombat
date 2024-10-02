@@ -15,7 +15,7 @@ const GeminiBot = ({ handleToolUse, userData }) => {
   });
 
   const [userInput, setUserInput] = useState("");
-  const [wordCount, setWordCount] = useState(0); // State for word count
+  const [charCount, setCharCount] = useState(0); // State for character count
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false); // Flag for submission in progress
 
@@ -25,10 +25,10 @@ const GeminiBot = ({ handleToolUse, userData }) => {
 
   const handleInputChange = (event) => {
     const inputText = event.target.value;
-    const wordCount = inputText.trim().split(/\s+/).filter(Boolean).length;
+    const charCount = inputText.length;
 
-    // Block further input if the word count exceeds 100
-    if (wordCount > 100) {
+    // Block further input if the character count exceeds 500
+    if (charCount > 500) {
       event.preventDefault();
       return;
     }
@@ -37,8 +37,8 @@ const GeminiBot = ({ handleToolUse, userData }) => {
     event.target.style.height = "auto"; // Reset the height
     event.target.style.height = event.target.scrollHeight + "px"; // Set it to scroll height
 
-    // Update word count and user input state
-    setWordCount(wordCount);
+    // Update character count and user input state
+    setCharCount(charCount);
     setUserInput(inputText);
   };
 
@@ -54,7 +54,7 @@ const GeminiBot = ({ handleToolUse, userData }) => {
     const newUserMessage = { role: "User", content: userInput };
     setMessages((prevMessages) => [...prevMessages, newUserMessage]);
     setUserInput("");
-    setWordCount(0); // Reset word count
+    setCharCount(0); // Reset character count
 
     try {
       const model = genAI.getGenerativeModel({ model: "gemini-pro" });
@@ -119,11 +119,11 @@ const GeminiBot = ({ handleToolUse, userData }) => {
           }}
           disabled={userData.virtualCoins < 40 || isLoading || isSubmitting} // Disable button when submitting or loading
         >
-          Send (COST: )
+          Send ( COST: 300 )
         </button>
       </form>
-      {/* Display the word count */}
-      <p>Word count: {wordCount}/100</p>
+      {/* Display the character count */}
+      <p>Character count: {charCount}/500</p>
 
       {isLoading && <p>Loading...</p>}
     </div>

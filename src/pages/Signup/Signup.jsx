@@ -19,7 +19,7 @@ const Signup = () => {
       // Create a user document in Firestore with team name and other fields
       await setDoc(doc(db, 'users', user.uid), {
         hackerRankPoints: 0,
-        virtualCoins: 500,
+        virtualCoins: 800,
         teamName: teamName, // Add teamName to the document
         usage: {
           gpt: 0,               // Initialize with 0 usage count
@@ -28,6 +28,7 @@ const Signup = () => {
           swapProgram: 0,        // Initialize with 0 usage count
           timeExtended: 0,       // Initialize with 0 usage count
         },
+        snippet:""
       });
 
       // Reset form and handle successful signup
